@@ -1,0 +1,94 @@
+<script type="text/javascript" src="/siteassets/scripts/pnp.min.js"></script>
+<script type="text/javascript" src="/siteassets/scripts/fetch.js"></script>
+<script type="text/javascript" src="/siteassets/scripts/promise.min.js"></script>
+<script type="text/javascript" src="/siteassets/scripts/react.js"></script>
+<script type="text/javascript" src="/siteassets/scripts/react-dom.js"></script>
+<script type="text/javascript" src="/siteassets/scripts/browser.min.js"></script>
+ 
+<!-- To style table in html -->
+<style type="text/css">
+.web-table th{ background-color:#ddd; border:2px solid #fff;}
+.web-table td{ background-color:#eee; border:2px solid #fff;}
+.web-heading{ padding:2px;}
+</style>
+ 
+<div id='tableContainer'></div>
+ 
+<!-- browser.min.js file used to compile and transfer the scripts within text/babel script element to javascript readle for React javascript library -->
+<script type="text/babel">
+//ShowWebsApp is the parent component, which renders the table and each row component.
+var ShowWebsApp = React.createClass({
+ 
+getInitialState: function(){
+return{
+pnpResults: []
+}
+},
+ 
+componentDidMount: function() {
+this.getWebs();
+},
+ 
+showResults: function(response){
+this.setState({
+pnpResults: response
+})
+},
+ 
+getWebs: function(){
+$pnp.sp.web.webs.get().then(function(result) {
+this.showResults(result);
+}.bind(this));
+},
+ 
+render: function(){
+return (
+<div>
+<Results pnpResponse={this.state.pnpResults} />
+</div>
+);
+}
+});
+ 
+//Create Table component - Within a table component, we have declared the headings for the table
+var Results = React.createClass({
+render: function(){
+var resultItems = this.props.pnpResponse.map(function(result){
+return <ResultItem webId={result.Id} webTitle={result.Title} webTemplate={result.WebTemplate} webCreated={new Date(result.Created)} />
+ 
+});
+return(
+<table width="100%" cellPadding="10" cellSpacing="2" className="web-table">
+<thead>
+<tr>
+<th>Title</th>
+<th>Id</th>
+<th>Created</th>
+<th>Web Template</th>
+</tr>
+</thead>
+<tbody>
+{resultItems}
+</tbody>
+</table>
+);
+}
+});
+ 
+//Create Row component
+var ResultItem = React.createClass({
+render: function(){
+return (
+<tr>
+<td>{this.props.webTitle} </td>
+<td>{this.props.webId} </td>
+<td>{this.props.webCreated.toLocaleString()}</td>
+<td>{this.props.webTemplate}</td>
+</tr>
+);
+}
+});
+ 
+//Render the container component in html element with id “tableContainer”
+ReactDOM.render(<ShowWebsApp/>, document.getElementById('tableContainer'));
+</script>
